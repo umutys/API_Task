@@ -11,9 +11,9 @@
 ## 2_twoUsersSameEmail for "Test if you can create two users with the same email address."
 This part might be little bit complicated
 1) Created user1
-2) Tried to craeting user2 with same email address as user1
+2) Tried to creating user2 with same email address as user1
 3) Uptaded user1 
-4) Tried to craeting user2 with same email address as (after uptade)new user1
+4) Tried to creating user2 with same email address as (after uptade)new user1
 5) Created user2 with (before uptade)old user1 email adress
 6) Tried to make the e-mail addresses the same by updating
 
