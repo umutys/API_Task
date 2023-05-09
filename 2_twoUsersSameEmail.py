@@ -40,17 +40,21 @@ def create_user_and_return_email():
 
     response = requests.post(USER_URL, headers=headers, json=data)
 
-    response_data = response.json()
+    assert response.status_code == 201, "for new data response status code is not true"
 
-    just_data = response_data['data']
+    if response.status_code == 201:
 
-    # we need "id" part for uptade this user
-
-    user_id = just_data['id']
+        response_data = response.json()
+        just_data = response_data['data']
+        # we need "id" part for posts and todos without "id" we can not create posts or todos
+        user_id = just_data['id']
+        print(response_data)
+    else:
+        print(response.status_code)
 
     return(username,domain,user_id)
 
-def test_try_create_second_user(u1,d1):
+def try_create_second_user_with_same_email(need_username,need_domain):
 
     username = ''.join(random.choices(string.ascii_lowercase, k=10))
     
@@ -64,7 +68,7 @@ def test_try_create_second_user(u1,d1):
     
     data = {
         "name": username,
-        "email": u1 + '@' + d1,
+        "email": need_username + '@' + need_domain,
         "gender": gender,
         "status": status
     }
@@ -73,16 +77,19 @@ def test_try_create_second_user(u1,d1):
 
     response = requests.post(USER_URL, headers=headers, json=data)
 
-    response_data = response.json()
+    if response.status_code == 201:
+        assert response.status_code == 201
+        response_data = response.json()
+        print(response_data)
+    else:
+        assert response.status_code == 422
+        response_data = response.json()
+        print(response_data)
 
-    print(response_data)
+first_username, first_domain, first_user_id = create_user_and_return_email()
+try_create_second_user_with_same_email(first_username, first_domain)
 
-    print(response.status_code)
-
-u1_username, u1_domain, u1_user_id = create_user_and_return_email()
-test_try_create_second_user(u1_username, u1_domain)
-
-def test_uptade_user1(u1_user_id):
+def uptade_first_user(need_first_user_id):
     
     # random variable generation part for creating new user
 
@@ -108,23 +115,28 @@ def test_uptade_user1(u1_user_id):
 
     # uptading user1 with these data
 
-    url_with_user = USER_URL + "/" + str(u1_user_id)
+    url_with_user = USER_URL + "/" + str(need_first_user_id)
 
     response = requests.put(url_with_user, headers=headers, json=data)
 
-    response_data1 = response.json()
+    assert response.status_code == 200, "for new data response status code is not true"
 
-    print(response_data1)
+    if response.status_code == 200:
+
+        response_data = response.json()
+        print(response_data)
+    else:
+        print(response.status_code)
 
     return(username,domain)
 
-u2_username, u2_domain = test_uptade_user1(u1_user_id)
+updated_first_username, updated_first_domain = uptade_first_user(first_user_id)
 
 # we will see again we can not craete with same email but at the same time we will check this skill works for uptades 
 
-test_try_create_second_user(u2_username, u2_domain)
+try_create_second_user_with_same_email(updated_first_username, updated_first_domain)
 
-def test_try_create_second_user_valid(u1_username, u1_domain):
+def create_second_user_with_first_email(need_first_username, need_first_domain):
 
     # random variable generation part for creating new user
 
@@ -140,7 +152,7 @@ def test_try_create_second_user_valid(u1_username, u1_domain):
     
     data = {
         "name": username,
-        "email": u1_username + '@' + u1_domain,
+        "email": need_first_username + '@' + need_first_domain,
         "gender": gender,
         "status": status
     }
@@ -149,28 +161,26 @@ def test_try_create_second_user_valid(u1_username, u1_domain):
 
     response = requests.post(USER_URL, headers=headers, json=data)
 
-    response_data = response.json()
+    assert response.status_code == 201, "for new data response status code is not true"
 
-    just_data = response_data['data']
+    if response.status_code == 201:
 
-    print(just_data)
-
-    # we need "id" part for uptade this user
-
-    user_id = just_data['id']
-
-    print(user_id)
-
-    print(response_data)
+        response_data = response.json()
+        just_data = response_data['data']
+        # we need "id" part for posts and todos without "id" we can not create posts or todos
+        user_id = just_data['id']
+        print(response_data)
+    else:
+        print(response.status_code)
 
     return user_id
 
 # But this time this email adress free, we can use it
 
-last_user_id = test_try_create_second_user_valid(u1_username, u1_domain)
+second_user_id = create_second_user_with_first_email(first_username, first_domain)
 
 
-def test_uptade_user2(u2_username, u2_domain, last_user_id):
+def try_to_uptade_second_user_with_updated_first_user_same_email(need_updated_first_username, need_updated_first_domain, need_second_user_id):
     
     # random variable generation part for creating new user
 
@@ -186,24 +196,24 @@ def test_uptade_user2(u2_username, u2_domain, last_user_id):
     
     data = {
         "name": username,
-        "email": u2_username + '@' + u2_domain,
+        "email": need_updated_first_username + '@' + need_updated_first_domain,
         "gender": gender,
         "status": status
     }
 
     # uptading user2 with these data
 
-    last_url = USER_URL + "/" + str(last_user_id)
+    last_url = USER_URL + "/" + str(need_second_user_id)
 
     response = requests.put(last_url, headers=headers, json=data)
 
-    response_data1 = response.json()
+    assert response.status_code == 422
 
-    print(response_data1)
+    response_data = response.json()
 
-    print(response.status_code)
+    print(response_data)
 
 # we try to with another valid email
 
-test_uptade_user2(u2_username, u2_domain, last_user_id)
+try_to_uptade_second_user_with_updated_first_user_same_email(updated_first_username, updated_first_domain, second_user_id)
 
